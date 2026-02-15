@@ -2,7 +2,7 @@ AtBa Original License
 The AtBa Corporation created license at this HTML Licenses
 1.The Webkit Renderer info
 a. The Webkit Renderer made by AtBa Engine 1.11.9 Preview
-b. The Webkit Renderer supports old browsers like IE8 and Chrome 1 
+b. The Webkit Renderer supports old browsers like IE8 and Chrome. The İcons and each other 
 
 
 2.License Info
