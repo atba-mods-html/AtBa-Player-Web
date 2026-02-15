@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AtBa IPTV Player</title>
+
+<style>
+:root{
+  --bg:#000;
+  --panel:#111;
+  --accent:#ff9800;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:Arial, sans-serif;
+}
+#app{
+  max-width:100%;
+}
+#player-box{
+  position:relative;
+}
+video{
+  width:100%;
+  background:black;
+}
+#overlay{
+  position:absolute;
+  top:10px;
+  left:10px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  background:rgba(0,0,0,.6);
+  padding:8px 12px;
+  border-radius:10px;
+}
+#logo{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+  display:none;
+}
+#meta{
+  font-size:14px;
+}
+#controls{
+  background:var(--panel);
+  padding:10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+button{
+  background:var(--accent);
+  color:black;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  font-weight:bold;
+}
+input[type=file]{
+  color:white;
+}
+input[type=range]{
+  width:120px;
+}
+#epg{
+  display:none;
+  margin:10px;
+  background:#1a1a1a;
+  padding:12px;
+  border-radius:10px;
+}
+#epg h3{
+  margin-top:0;
+  color:var(--accent);
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div id="player-box">
+    <video id="video" controls autoplay></video>
+
+    <div id="overlay">
+      <img id="logo">
+      <div id="meta">
+        <div id="chName">Kanal: -</div>
+        <div id="chDate">Tarih: -</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <input type="file" id="file" accept=".m3u,.m3u8,.mp4,.webm">
+    <button onclick="toggleEPG()">EPG</button>
+
+    <!-- Mobil Ses -->
+    <label>Ses:
+      <input type="range" min="0" max="1" step="0.01" value="1"
+        oninput="video.volume=this.value">
+    </label>
+  </div>
+
+  <div id="epg">
+    <h3 id="epgTitle">Yayın Akışı</h3>
+    <pre id="epgText">Henüz veri yok.</pre>
+  </div>
+
+</div>
+
+<script>
+const video = document.getElementById("video");
+const fileInput = document.getElementById("file");
+const logo = document.getElementById("logo");
+const chName = document.getElementById("chName");
+const chDate = document.getElementById("chDate");
+const epg = document.getElementById("epg");
+const epgTitle = document.getElementById("epgTitle");
+const epgText = document.getElementById("epgText");
+
+// Basit kanal-logo veritabanı
+const logos = {
+  "atv":"https://upload.wikimedia.org/wikipedia/commons/6/6a/Atv_logo_2011.png",
+  "trt":"https://upload.wikimedia.org/wikipedia/commons/4/4a/TRT_logo.png",
+  "kanald":"https://upload.wikimedia.org/wikipedia/commons/2/2f/Kanal_D_logo.png",
+  "fox":"https://upload.wikimedia.org/wikipedia/commons/3/3f/FOX_wordmark-orange.png",
+  "tv8":"https://upload.wikimedia.org/wikipedia/commons/9/9f/TV8_logo_2014.png"
+};
+
+fileInput.addEventListener("change", ()=>{
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  const url = URL.createObjectURL(file);
+  video.src = url;
+
+  const channel = file.name.split(".")[0];
+  chName.innerText = "Kanal: " + channel;
+  chDate.innerText = "Yüklendi: " + new Date().toLocaleString("tr-TR");
+
+  // Logo
+  let found = null;
+  for(let key in logos){
+    if(channel.toLowerCase().includes(key)){
+      found = logos[key];
+    }
+  }
+  if(found){
+    logo.src = found;
+    logo.style.display="block";
+  }else{
+    logo.style.display="none";
+  }
+
+  // Fake ama gerçekçi EPG
+  epgTitle.innerText = channel + " - Yayın Akışı";
+  epgText.textContent =
+`08:00 Haberler
+10:00 Sabah Programı
+12:30 Dizi
+15:00 Film
+18:00 Yarışma
+20:00 Ana Haber
+22:00 Gece Dizisi`;
+});
+
+// EPG toggle
+function toggleEPG(){
+  epg.style.display = epg.style.display==="block" ? "none" : "block";
+}
+
+// Kumanda / Klavye
+document.addEventListener("keydown", e=>{
+  switch(e.key){
+    case " ":
+    case "Enter":
+      video.paused ? video.play() : video.pause();
+      break;
+    case "ArrowRight":
+      video.currentTime += 10;
+      break;
+    case "ArrowLeft":
+      video.currentTime -= 10;
+      break;
+    case "ArrowUp":
+      video.volume = Math.min(1, video.volume + 0.1);
+      break;
+    case "ArrowDown":
+      video.volume = Math.max(0, video.volume - 0.1);
+      break;
+  }
+});
+</script>
+</body>
+</html>
